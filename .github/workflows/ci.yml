@@ -5,6 +5,12 @@ on:
     paths:
       - 'playlist.txt'
 
+permissions:
+  contents: read
+  packages: read
+  actions: read
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,3 +34,4 @@ jobs:
         with:
           name: youtube下载视频
           path: output/
+
