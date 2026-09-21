@@ -1,25 +1,30 @@
-name: ci
-
-on: [push, pull_request]
+name: YT-DLP Download
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'playlist.txt'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
 
-      - name: download
+      - name: 安装 yt-dlp + ffmpeg
         run: |
-          git config --local user.email "justjavac@gmail.com"
-          git config --local user.name "迷渡"
-          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git pull --rebase
-          ./bin/youtube-dl --config-location config.txt
-          git add .
-          git commit -m "download youtube video"
-          git push
+          sudo apt update
+          sudo apt install -y ffmpeg
+          pip install yt-dlp
+
+      - name: 开始批量下载视频
+        run: |
+          mkdir -p output
+          yt-dlp -a playlist.txt -o "output/%(title)s.%(ext)s" -f "bv*+ba/b" --merge-output-format mp4
+
+      - name: 上传打包文件到Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube下载视频
+          path: output/
